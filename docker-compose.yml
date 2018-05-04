@@ -6,12 +6,18 @@ services:
     tty: true
     ports:
       - "5201:5201"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
     networks:
       s1:
         ipv4_address: 10.0.10.10
   sgw:
     build: ./sgw
     tty: true
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
     networks:
       s1:
         ipv4_address: 10.0.10.20
@@ -20,6 +26,9 @@ services:
   upgw:
     build: ./upgw
     tty: true
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
     networks:
       s5:
         ipv4_address: 10.0.11.20
@@ -28,6 +37,9 @@ services:
   gw:
     build: ./gw
     tty: true
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
     networks:
       sgi:
         ipv4_address: 10.0.12.20
