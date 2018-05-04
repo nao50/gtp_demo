@@ -5,6 +5,8 @@ import (
 	"log"
 	"net"
 	"syscall"
+
+	"./gtpv1"
 )
 
 func main() {
@@ -61,7 +63,7 @@ func main() {
 		fmt.Printf("Recv SockaddrLinklayer: %+v\n", sa)
 
 		go func() {
-			g := &GTPV1{
+			g := &gtpv1.GTPV1{
 				Version:                 1,
 				ProtocolType:            1,
 				Reserved:                0,

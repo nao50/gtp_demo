@@ -1,4 +1,4 @@
-package main
+package gtpv1
 
 import (
 	"encoding/binary"
