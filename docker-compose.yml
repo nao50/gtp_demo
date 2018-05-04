@@ -3,62 +3,52 @@ version: "3"
 services:
   ue:
     build: ./ue
+    tty: true
     ports:
       - "5201:5201"
     networks:
       s1:
-        ipv4_address: 10.0.10.1
-
+        ipv4_address: 10.0.10.10
   sgw:
     build: ./sgw
-    ports:
-      - "5201:5201"
-      - "2152:2152"
-      - "2123:2123"
+    tty: true
     networks:
       s1:
-        ipv4_address: 10.0.10.2
+        ipv4_address: 10.0.10.20
       s5:
-        ipv4_address: 10.0.11.1
+        ipv4_address: 10.0.11.10
   upgw:
     build: ./upgw
-    ports:
-      - "5201:5201"
-      - "2152:2152"
-      - "2123:2123"
+    tty: true
     networks:
       s5:
-        ipv4_address: 10.0.11.2
+        ipv4_address: 10.0.11.20
       sgi:
-        ipv4_address: 10.0.12.1
+        ipv4_address: 10.0.12.10
   gw:
     build: ./gw
-    ports:
-      - "5201:5201"
-      - "2152:2152"
-      - "2123:2123"
+    tty: true
     networks:
       sgi:
-        ipv4_address: 10.0.12.2
+        ipv4_address: 10.0.12.20
+
 networks:
   s1:
     driver: bridge
     ipam:
       config:
         - subnet: 10.0.10.0/24
-          gateway: 10.0.10.254
   s5:
     driver: bridge
     ipam:
       config:
         - subnet: 10.0.11.0/24
-          gateway: 10.0.11.254  
   sgi:
     driver: bridge
     ipam:
       config:
         - subnet: 10.0.12.0/24
-          gateway: 10.0.12.254
+
 
 
     
