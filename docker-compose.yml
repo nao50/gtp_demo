@@ -1,0 +1,64 @@
+version: "3"
+
+services:
+  ue:
+    build: ./ue
+    ports:
+      - "5201:5201"
+    networks:
+      s1:
+        ipv4_address: 10.0.10.1
+
+  sgw:
+    build: ./sgw
+    ports:
+      - "5201:5201"
+      - "2152:2152"
+      - "2123:2123"
+    networks:
+      s1:
+        ipv4_address: 10.0.10.2
+      s5:
+        ipv4_address: 10.0.11.1
+  upgw:
+    build: ./upgw
+    ports:
+      - "5201:5201"
+      - "2152:2152"
+      - "2123:2123"
+    networks:
+      s5:
+        ipv4_address: 10.0.11.2
+      sgi:
+        ipv4_address: 10.0.12.1
+  gw:
+    build: ./gw
+    ports:
+      - "5201:5201"
+      - "2152:2152"
+      - "2123:2123"
+    networks:
+      sgi:
+        ipv4_address: 10.0.12.2
+networks:
+  s1:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.10.0/24
+          gateway: 10.0.10.254
+  s5:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.11.0/24
+          gateway: 10.0.11.254  
+  sgi:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.12.0/24
+          gateway: 10.0.12.254
+
+
+    
