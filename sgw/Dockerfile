@@ -5,4 +5,4 @@ RUN go get -u github.com/golang/dep/...
 
 ADD . ${GOPATH}
 
-CMD ["go", "run", "sgw.go"]
+
