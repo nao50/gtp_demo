@@ -4,8 +4,6 @@ services:
   ue:
     build: ./ue
     tty: true
-    ports:
-      - "5201:5201"
     cap_add:
       - NET_ADMIN
       - NET_RAW
