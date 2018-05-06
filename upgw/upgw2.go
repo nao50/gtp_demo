@@ -78,8 +78,9 @@ func uplink(c chan int) {
 			if err != nil {
 				log.Fatal("Sendto:", err)
 			}
+			c <- len(v1Packet.Data)
 		}()
-		c <- len(v1Packet.Data)
+
 	}
 }
 
