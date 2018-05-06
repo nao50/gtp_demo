@@ -6,7 +6,8 @@ import (
 	"net"
 	"syscall"
 
-	"github.com/naoyamaguchi/gtp/gtpv1"
+  // "github.com/naoyamaguchi/gtp/gtpv1"
+  "./gtpv1"
 	"golang.org/x/net/ipv4"
 )
 
