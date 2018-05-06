@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"sync"
 	"syscall"
 
 	// "github.com/naoyamaguchi/gtp/gtpv1"
@@ -12,25 +13,18 @@ import (
 )
 
 func main() {
-	serveUPGW()
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go serveUPGW()
+	wg.Wait()
+	fmt.Println("never called")
 }
 
 func serveUPGW() {
-	uplinkch := make(chan int, 1)
-	downlinkch := make(chan int, 1)
 
 	go uplink(uplinkch)
 	go downlink(downlinkch)
 
-	for {
-		select {
-		case <-uplinkch:
-			fmt.Println("die and up uplinkch:", <-uplinkch)
-		case <-downlinkch:
-			fmt.Println("die and up downlinkch:", <-downlinkch)
-		default:
-		}
-	}
 }
 
 func uplink(c chan int) {
@@ -78,7 +72,6 @@ func uplink(c chan int) {
 			if err != nil {
 				log.Fatal("Sendto:", err)
 			}
-			c <- len(v1Packet.Data)
 		}()
 
 	}
@@ -152,7 +145,6 @@ func downlink(c chan int) {
 				return
 			}
 		}()
-		c <- n
 	}
 
 }

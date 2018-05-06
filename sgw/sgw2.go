@@ -4,33 +4,27 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"sync"
 	"syscall"
 
-	"github.com/naoyamaguchi/gtp/gtpv1"
-	// "./gtpv1"
+	// "github.com/naoyamaguchi/gtp/gtpv1"
+	"./gtpv1"
 	"golang.org/x/net/ipv4"
 )
 
 func main() {
-	serveSGW()
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go serveSGW()
+	wg.Wait()
+	fmt.Println("never called")
 }
 
 func serveSGW() {
-	uplinkch := make(chan int, 1)
-	downlinkch := make(chan int, 1)
 
 	go uplink(uplinkch)
 	go downlink(downlinkch)
 
-	for {
-		select {
-		case <-uplinkch:
-			fmt.Println("die and up uplinkch:", <-uplinkch)
-		case <-downlinkch:
-			fmt.Println("die and up downlinkch:", <-downlinkch)
-		default:
-		}
-	}
 }
 
 func uplink(c chan int) {
@@ -99,7 +93,6 @@ func uplink(c chan int) {
 				fmt.Println(err)
 				return
 			}
-			c <- n
 		}()
 	}
 }
@@ -145,7 +138,6 @@ func downlink(c chan int) {
 			if err != nil {
 				log.Fatal("Sendto:", err)
 			}
-			c <- len(v1Packet.Data)
 		}()
 	}
 }
