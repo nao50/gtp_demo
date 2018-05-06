@@ -7,67 +7,35 @@ import (
 	"syscall"
 
 	"github.com/naoyamaguchi/gtp/gtpv1"
+	// "./gtpv1"
 	"golang.org/x/net/ipv4"
 )
 
-func SGWDownlink()
+func main() {
+	serveSGW()
+}
 
-func ListenGtpv1(laddr *net.UDPAddr) *net.UDPConn {
-	udpConn, err := net.ListenUDP("udp", laddr)
-	if err != nil {
-		log.Println(err)
-	}
+func serveSGW() {
+	uplinkch := make(chan int, 1)
+	downlinkch := make(chan int, 1)
 
-	downlinkBuffer := make([]byte, 1550)
+	go uplink(uplinkch)
+	go downlink(downlinkch)
 
 	for {
-		n, _, err := udpConn.ReadFromUDP(downlinkBuffer)
-		if err != nil {
-			log.Println(err)
+		select {
+		case <-uplinkch:
+			fmt.Println("die and up uplinkch:", <-uplinkch)
+		case <-downlinkch:
+			fmt.Println("die and up downlinkch:", <-downlinkch)
+		default:
 		}
 	}
-
-	return udpConn
 }
 
-func ParseGtpv1(downlinkBuffer []byte, size int) (*gtpv1.GTPV1, *ipv4.Header, error) {
-	v1Packet := new(gtpv1.GTPV1)
-	err := v1Packet.Parse(downlinkBuffer[:size])
-	if err != nil {
-		return nil, nil, err
-	}
-
-	ipv4header, err := ipv4.ParseHeader(v1Packet.Data)
-	if err != nil {
-		return nil, nil, err
-	}
-	return v1Packet, ipv4header, nil
-
-}
-
-func main() {
-	///////////////////////////////////////////////////////////////////////////////////////
-	// common
-	const proto = (syscall.ETH_P_IP<<8)&0xff00 | syscall.ETH_P_IP>>8
+func uplink(c chan int) {
 	uplinkBuffer := make([]byte, 1550)
-	downlinkBuffer := make([]byte, 1550)
-
-	///////////////////////////////////////////////////////////////////////////////////////
-	// S1:DOWNLINK:Send:RawSocket
-	fd, _ := syscall.Socket(syscall.AF_INET, syscall.SOCK_RAW, syscall.IPPROTO_RAW)
-	defer syscall.Close(fd)
-
-	///////////////////////////////////////////////////////////////////////////////////////
-	// S5:DOWNLINK:Recv:GTPv1Decap
-	udpAddr := &net.UDPAddr{
-		IP:   net.ParseIP("0.0.0.0"),
-		Port: 2152,
-	}
-	udpConn, err := net.ListenUDP("udp", udpAddr)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
+	const proto = (syscall.ETH_P_IP<<8)&0xff00 | syscall.ETH_P_IP>>8
 	///////////////////////////////////////////////////////////////////////////////////////
 	// S1:UPLINK:Recv:RawSocket
 	recvSockFd, err := syscall.Socket(syscall.AF_PACKET, syscall.SOCK_DGRAM, proto)
@@ -89,7 +57,6 @@ func main() {
 	if err := syscall.Bind(recvSockFd, &recvSll); err != nil {
 		log.Fatal("bind: ", err)
 	}
-
 	///////////////////////////////////////////////////////////////////////////////////////
 	// S5:UPLINK:Send:GTPv1Encap
 	conn, err := net.Dial("udp4", "10.0.11.20:2152")
@@ -100,9 +67,7 @@ func main() {
 
 	///////////////////////////////////////////////////////////////////////////////////////
 	// main loop
-	fmt.Println("Starting SGW server...")
 	for {
-		////////// up link //////////
 		n, addr, err := syscall.Recvfrom(recvSockFd, uplinkBuffer, 0)
 		if err != nil {
 			log.Fatalln(err)
@@ -134,9 +99,30 @@ func main() {
 				fmt.Println(err)
 				return
 			}
+			c <- n
 		}()
+	}
+}
 
-		////////// down link //////////
+func downlink(c chan int) {
+	downlinkBuffer := make([]byte, 1550)
+	///////////////////////////////////////////////////////////////////////////////////////
+	// S5:DOWNLINK:Recv:GTPv1Decap
+	udpAddr := &net.UDPAddr{
+		IP:   net.ParseIP("0.0.0.0"),
+		Port: 2152,
+	}
+	udpConn, err := net.ListenUDP("udp", udpAddr)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	///////////////////////////////////////////////////////////////////////////////////////
+	// S1:DOWNLINK:Send:RawSocket
+	fd, _ := syscall.Socket(syscall.AF_INET, syscall.SOCK_RAW, syscall.IPPROTO_RAW)
+	defer syscall.Close(fd)
+	///////////////////////////////////////////////////////////////////////////////////////
+	// main loop
+	for {
 		n, _, err := udpConn.ReadFromUDP(downlinkBuffer)
 		if err != nil {
 			log.Fatalln(err)
@@ -159,7 +145,7 @@ func main() {
 			if err != nil {
 				log.Fatal("Sendto:", err)
 			}
+			c <- len(v1Packet.Data)
 		}()
-
 	}
 }
