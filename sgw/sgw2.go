@@ -22,12 +22,12 @@ func main() {
 
 func serveSGW() {
 
-	go uplink(uplinkch)
-	go downlink(downlinkch)
+	go uplink()
+	go downlink()
 
 }
 
-func uplink(c chan int) {
+func uplink() {
 	uplinkBuffer := make([]byte, 1550)
 	const proto = (syscall.ETH_P_IP<<8)&0xff00 | syscall.ETH_P_IP>>8
 	///////////////////////////////////////////////////////////////////////////////////////
@@ -97,7 +97,7 @@ func uplink(c chan int) {
 	}
 }
 
-func downlink(c chan int) {
+func downlink() {
 	downlinkBuffer := make([]byte, 1550)
 	///////////////////////////////////////////////////////////////////////////////////////
 	// S5:DOWNLINK:Recv:GTPv1Decap
