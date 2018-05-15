@@ -7,8 +7,11 @@ GTP-U demonstration application in Golang
 $ git clone https://github.com/naoyamaguchi/gtp_demo.git
 $ cd gtp_demo
 $ docker-compose up -d
-$ 
 ```
+ NW diagram overview 
+
+![nw-diagram](https://raw.githubusercontent.com/naoyamaguchi/gtp_demo/images/nwdiagram.png)
+
 2. exec pseudo ue/gw container & configuration routing
 ```
 $ # ue container
@@ -19,7 +22,15 @@ $ # gw container
 $ docker-compose exec gw bash
 $ sh init.sh
 ```
-![nw-diagram](https://raw.githubusercontent.com/naoyamaguchi/gtp_demo/images/nwdiagram.png)
+3. ping from ue to gw
+```
+$ # gw container
+$ tcpdump -i eth0
+
+$ # ue container
+$ ping 10.0.12.20
+```
+
 ## Usage
 
 ## 
