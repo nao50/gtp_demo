@@ -1,5 +1,6 @@
 # GTP demo
 GTP-U demonstration application in Golang
+(GTP-C is comming soon ...)
 
 ## Getting Started
 1. git clone & docker up.
