@@ -6,5 +6,4 @@ RUN apt-get update -y && apt-get install -y vim tcpdump iperf3
 RUN go get -u github.com/golang/dep/...
 
 ADD . ${GOPATH}
-RUN chmod +x ${GOPATH}/init.sh
-CMD ["${GOPATH}/init.sh"]
+RUN chmod +x /go/init.sh
