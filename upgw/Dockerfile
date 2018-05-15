@@ -6,3 +6,5 @@ RUN go get -u golang.org/x/net/ipv4
 # RUN go get -u github.com/naoyamaguchi/gtp
 
 ADD . ${GOPATH}
+
+
